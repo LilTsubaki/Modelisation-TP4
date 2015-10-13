@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "vector3d.h"
 #ifndef dabs
     #define dabs(x) x>0?x:-x

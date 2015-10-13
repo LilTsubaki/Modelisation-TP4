@@ -8,6 +8,18 @@ Maillage::Maillage()
 
 }
 
+void Maillage::calculNormalTriangle()
+{
+	Vector3D ab;
+	Vector3D ac;
+	for(int i = 0; i < topo.size(); i+=3)
+	{
+		ab = geom.at(topo.at(i+1)) - geom.at(topo.at(i));
+		ac = geom.at(topo.at(i+2)) - geom.at(topo.at(i));
+		normales.push_back(ab^ac);
+	}
+}
+
 
 void Maillage::Ecriture(std::string nom)
 {
@@ -108,6 +120,35 @@ Maillage Maillage::lectureOff(std::string nom)
     return Maillage(geom, topo);
 }
 
+std::vector<Vector3D> Maillage::getGeom() const
+{
+    return geom;
+}
+
+void Maillage::setGeom(const std::vector<Vector3D> &value)
+{
+    geom = value;
+}
+
+std::vector<int> Maillage::getTopo() const
+{
+    return topo;
+}
+
+void Maillage::setTopo(const std::vector<int> &value)
+{
+    topo = value;
+}
+
+std::vector<Vector3D> Maillage::getNormales() const
+{
+    return normales;
+}
+
+void Maillage::setNormales(const std::vector<Vector3D> &value)
+{
+    normales = value;
+}
 
 
 Maillage::~Maillage()

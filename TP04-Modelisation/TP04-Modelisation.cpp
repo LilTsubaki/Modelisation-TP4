@@ -2,7 +2,8 @@
 #include <stdio.h>      
 #include <stdlib.h>     
 #include <math.h>
-#include "glut.h"  
+#include "glut.h" 
+#include "Maillage.h"
 
 #define WIDTH  480
 #define HEIGHT 480
@@ -23,16 +24,25 @@ GLvoid window_reshape(GLsizei width, GLsizei height);
 GLvoid window_key(unsigned char key, int x, int y); 
 GLvoid window_idle(); 
  
-//static double zRotate = 0.5;
-//static double facteur = 0.5;
+static double zRotate = 0.5;
+static double facteur = 0.5;
+static Maillage maille;
 
 int main(int argc, char **argv) 
 {  
   // initialisation  des paramètres de GLUT en fonction
   // des arguments sur la ligne de commande
+
+	
+
   glutInit(&argc, argv);
      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
  
+	 maille = Maillage::lectureOff("C:/Users/etu/Desktop/bunny.off");
+	 maille.calculNormalTriangle();
+    //bunny.Ecriture("bunny.obj");
+
+
   // définition et création de la fenêtre graphique
   glutInitWindowSize(WIDTH, HEIGHT);
   glutInitWindowPosition(0, 0);
@@ -56,6 +66,30 @@ int main(int argc, char **argv)
   return 1;
 }
  
+GLvoid afficheMaille()
+{
+	Vector3D a;
+	Vector3D b;
+	Vector3D c;
+	std::cout << maille.getTopo().size() << std::endl;
+	for(int i =0; i < maille.getTopo().size(); i+=3)
+	{
+		a = maille.getGeom().at(maille.getTopo().at(i));
+		b = maille.getGeom().at(maille.getTopo().at(i+1));
+		c = maille.getGeom().at(maille.getTopo().at(i+2));
+
+
+		glBegin(GL_LINE_LOOP);
+			glVertex3f (a.x(), a.y(), a.z());
+			glVertex3f (b.x(), b.y(), b.z());
+			glVertex3f (c.x(), c.y(), c.z());
+	   glEnd();
+	}
+
+	std::cout << "endload" << std::endl;
+}
+
+
 // initialisation du fond de la fenêtre graphique : noir opaque
  
 GLvoid initGL() 
@@ -78,7 +112,7 @@ GLvoid window_display()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
   render_scene();
-
+  afficheMaille();
   // trace la scène grapnique qui vient juste d'être définie
   glFlush();
   glutSwapBuffers();

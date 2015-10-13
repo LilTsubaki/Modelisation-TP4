@@ -93,7 +93,6 @@ public:
      * @return a reference to the vector
      */
 
-    void rotate(const QMatrix3x3 &mat);
 
     Vector3D &operator+=(const Vector3D &vector);
     /**
