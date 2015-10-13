@@ -14,9 +14,14 @@ void Maillage::calculNormalTriangle()
 	Vector3D ac;
 	for(int i = 0; i < topo.size(); i+=3)
 	{
+		//std::cout << "a : " << geom.at(topo.at(i)).x() << " | " <<  geom.at(topo.at(i)).y()<< " | " <<  geom.at(topo.at(i)).z() << std::endl;
+		//std::cout << "b : " << geom.at(topo.at(i+1)).x() << " | " <<  geom.at(topo.at(i+1)).y()<< " | " <<  geom.at(topo.at(i+1)).z() << std::endl;
+		//std::cout << "c : " << geom.at(topo.at(i+2)).x() << " | " <<  geom.at(topo.at(i+2)).y()<< " | " <<  geom.at(topo.at(i+2)).z() << std::endl;
 		ab = geom.at(topo.at(i+1)) - geom.at(topo.at(i));
 		ac = geom.at(topo.at(i+2)) - geom.at(topo.at(i));
-		normales.push_back(ab^ac);
+		Vector3D norm = (ab^ac).normalized();
+		//std::cout << norm.x() << " | " <<  norm.y()<< " | " <<  norm.z() << std::endl;
+		normales.push_back(norm);
 	}
 }
 
@@ -53,10 +58,24 @@ void Maillage::Ecriture(std::string nom)
     }
 }
 
-Maillage Maillage::lectureOff(std::string nom)
+Maillage Maillage::lectureOff(std::string nom, double taille)
 {
     std::vector<Vector3D> geom;
     std::vector<int> topo;
+
+	double sommeX = 0;
+	double sommeY = 0;
+	double sommeZ = 0;
+
+	double xMax = std::numeric_limits<double>::lowest();
+	double yMax = std::numeric_limits<double>::lowest();
+	double zMax = std::numeric_limits<double>::lowest();
+
+	double xMin = std::numeric_limits<double>::max();
+	double yMin = std::numeric_limits<double>::max();
+	double zMin = std::numeric_limits<double>::max();
+
+	double scale = 0;
 
     std::ifstream fichier (nom);
     if(fichier)
@@ -94,10 +113,55 @@ Maillage Maillage::lectureOff(std::string nom)
             delimiterPos_3 = readLine.find(" ", delimiterPos_2+1);
             temp.setZ(atof(readLine.substr(delimiterPos_2,delimiterPos_3 ).c_str()));
 			geom.push_back(temp);
+			sommeX += temp.x();
+			sommeY += temp.y();
+			sommeZ += temp.z();
+
+			if(temp.x() > xMax)
+				xMax = temp.x();
+			if(temp.x() < xMax)
+				xMin = temp.x();
+
+			if(temp.y() > yMax)
+				yMax = temp.y();
+			if(temp.y() < yMax)
+				yMin = temp.y();
+
+			if(temp.z() > zMax)
+				zMax = temp.z();
+			if(temp.z() < zMax)
+				zMin = temp.z();
             //std::cout << temp.x() << "\t" << temp.y() << "\t" << temp.z() << "\t" << std::endl;
         }
 
-        for (int n=0; n<nbTriangles; n++)
+		sommeX /= nbSommets;
+		sommeY /= nbSommets;
+		sommeZ /= nbSommets;
+
+		double scaleX = (xMax-xMin)/taille;
+		double scaleY = (yMax-yMin)/taille;
+		double scaleZ = (zMax-zMin)/taille;
+
+		if(scaleX > scaleY)
+		{
+			if(scaleX > scaleZ)
+			{
+				scale = scaleX;
+			}
+		}
+		else
+		{
+			if(scaleY> scaleZ)
+			{
+				scale = scaleY;
+			}
+			else
+			{
+				scale = scaleZ;
+			}
+		}
+
+		for (int n=0; n<nbTriangles; n++)
         {
             getline(fichier,readLine);
             delimiterPos_1 = readLine.find(" ", 0);
@@ -117,7 +181,7 @@ Maillage Maillage::lectureOff(std::string nom)
     {
         std::cout << "erreur à l'ouverture du fichier" << std::endl;
     }
-    return Maillage(geom, topo);
+    return Maillage(geom, topo, Vector3D(sommeX, sommeY, sommeZ), scale);
 }
 
 std::vector<Vector3D> Maillage::getGeom() const
@@ -150,6 +214,26 @@ void Maillage::setNormales(const std::vector<Vector3D> &value)
     normales = value;
 }
 
+
+Vector3D Maillage::getCentreGravite() const
+{
+    return centreGravite;
+}
+
+void Maillage::setCentreGravite(const Vector3D &value)
+{
+    centreGravite = value;
+}
+
+double Maillage::getScale() const
+{
+    return scale;
+}
+
+void Maillage::setScale(const double &value)
+{
+    scale = value;
+}
 
 Maillage::~Maillage()
 {
